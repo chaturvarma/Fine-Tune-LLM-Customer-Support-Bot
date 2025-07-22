@@ -3,7 +3,7 @@ from torch.optim import AdamW
 from tqdm import tqdm
 from torch.utils.data import DataLoader, TensorDataset
 
-def generate_input_output_pair(df_train, tokenizer, max_length=512):
+def generate_input_output_pair_tinyllama(df_train, tokenizer, max_length=512):
     prompts = [
         [
             {"role": "user", "content": instruction},

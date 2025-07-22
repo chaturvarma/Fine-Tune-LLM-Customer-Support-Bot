@@ -1,4 +1,4 @@
-def general_prompting(df_test, generator, categories):
+def general_prompting_tinyllama(df_test, generator, categories):
     correct = 0
     total = len(df_test)
     predictions = []

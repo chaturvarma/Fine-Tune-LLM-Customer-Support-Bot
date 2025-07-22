@@ -12,7 +12,7 @@ def tokenize_function(example, tokenizer, max_length=512):
     tokenized["labels"] = tokenized["input_ids"].copy()
     return tokenized
 
-def finetune_train(df_train, model, tokenizer):
+def finetune_train_tinyllama(df_train, model, tokenizer):
     dataset = Dataset.from_pandas(df_train[["instruction", "category"]])
     dataset = dataset.map(lambda x: format_chat(x, tokenizer))
     
@@ -86,7 +86,7 @@ def extract_category(text, categories):
 
     return "NOT FOUND"
 
-def evaluate_model_on_test_set(df_test, categories, model, tokenizer, device):
+def evaluate_model_on_test_set_tinyllama(df_test, categories, model, tokenizer, device):
     predictions = []
     correct = 0
     total = len(df_test)
