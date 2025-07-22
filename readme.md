@@ -1,6 +1,8 @@
 # Fine-Tuning Open Source LLMs for Customer Support Bot
 
-In this project, I explored the use of multiple open-source language models—starting with **TinyLlama**—to fine-tune a customer support AI that can classify user queries into predefined support categories. The goal was to enhance the accuracy and usefulness of a support bot by leveraging fine-tuning techniques, particularly **LoRA (Low-Rank Adaptation)**, to improve its classification capabilities beyond general prompting.
+In this project, I explored the use of multiple open-source language models—starting with **TinyLlama**—to fine-tune a customer support AI that can classify user queries into predefined support categories. 
+
+The goal was to enhance the accuracy and usefulness of a support bot by leveraging fine-tuning techniques, particularly **LoRA (Low-Rank Adaptation)**, to improve its classification capabilities beyond general prompting.
 
 ## 🛠️ Tech Stack
 
