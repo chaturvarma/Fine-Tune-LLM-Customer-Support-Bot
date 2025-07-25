@@ -1,7 +1,7 @@
+import re
 from datasets import Dataset
 from peft import prepare_model_for_kbit_training, LoraConfig, get_peft_model
 from transformers import TrainingArguments, Trainer, DataCollatorForLanguageModeling
-import re
 
 def format_chat(example, tokenizer):
     example["text"] = f"Instruction: {example['instruction']}\nLabeled Category: {example['category']}{tokenizer.eos_token}"
@@ -12,7 +12,7 @@ def tokenize_function(example, tokenizer, max_length=512):
     tokenized["labels"] = tokenized["input_ids"].copy()
     return tokenized
 
-def finetune_train_tinyllama(df_train, model, tokenizer):
+def finetune_category_tinyllama(df_train, model, tokenizer, device):
     dataset = Dataset.from_pandas(df_train[["instruction", "category"]])
     dataset = dataset.map(lambda x: format_chat(x, tokenizer))
     
@@ -33,12 +33,14 @@ def finetune_train_tinyllama(df_train, model, tokenizer):
     model.print_trainable_parameters()
 
     training_args = TrainingArguments(
-        output_dir="./tinyllama-lora-supportbot",
-        per_device_train_batch_size=4,
+        output_dir="./tinyllama-lora-category-classifier",
+        per_device_train_batch_size=8,
         gradient_accumulation_steps=2,
-        learning_rate=2e-4,
+        learning_rate=1e-4,
+        lr_scheduler_type="cosine",
+        warmup_ratio=0.03,
         num_train_epochs=3,
-        logging_steps=10,
+        logging_steps=100,
         save_strategy="epoch",
         report_to="none",
         fp16=True,
@@ -56,7 +58,7 @@ def finetune_train_tinyllama(df_train, model, tokenizer):
     )
 
     trainer.train()
-
+    return model
 
 def predict_output(text, model, tokenizer, device):
     prompt = f"Instruction: {text}\nLabeled Category:"
@@ -65,7 +67,6 @@ def predict_output(text, model, tokenizer, device):
         **inputs,
         max_new_tokens=40,
         do_sample=False,
-        temperature=0.0,
         eos_token_id=tokenizer.eos_token_id,
         pad_token_id=tokenizer.pad_token_id
     )
@@ -86,7 +87,7 @@ def extract_category(text, categories):
 
     return "NOT FOUND"
 
-def evaluate_model_on_test_set_tinyllama(df_test, categories, model, tokenizer, device):
+def evaluate_model_tinyllama(df_test, model, tokenizer, device, categories):
     predictions = []
     correct = 0
     total = len(df_test)
@@ -100,14 +101,9 @@ def evaluate_model_on_test_set_tinyllama(df_test, categories, model, tokenizer, 
         pred_category = pred_category.strip().upper()
         predictions.append(pred)
 
-        print("Predicted text: ", pred)
-        print("Predicted Category: ", pred_category)
-        print("Correct Category: ", true_category)
-        print("")
-
         if pred_category == true_category:
             correct += 1
 
     accuracy = (correct / total) * 100
 
-    return predictions, correct, total, accuracy
+    return accuracy
