@@ -105,11 +105,7 @@ Here is a simple overview of the entire workflow:
 
 3. The generator is used to predict the support category and intent using each model's `inference_prompting.py`, based on the `instruction` field in the validation set. This step is used to test baseline accuracy through inference without fine-tuning.
 
-4. For larger models like **LLaMA** and **Mistral**, a single model was fine-tuned to predict both **category** and **intent** together.  
-   For smaller models like **TinyLLaMA**, this approach did not yield good performance.
-
-   - Instead, two separate models were fine-tuned: one for **category classification**, and one for **intent classification**.
-   - Each model was fine-tuned on the training set using its respective `lora_finetuning.py`, with **LoRA adapters** applied to the base model.
+4. For all model sizes, including LLaMA, Mistral, and TinyLLaMA, two separate models were fine-tuned: one for **category classification** and one for **intent classification**. Each model was trained independently using its respective `lora_finetuning.py`, with LoRA adapters applied to the base model
 
 5. The fine-tuned models were evaluated on the validation set to compute the final classification accuracy for both category and intent prediction.
 
@@ -119,9 +115,10 @@ Here is a simple overview of the entire workflow:
 
 The table below compares the inference accuracy (zero-shot prompting) with accuracy after LoRA-based fine-tuning, evaluated on the test dataset:
 
-| Model     | Category (Before -> After) | Intent (Before -> After) |
-| --------- | -------------------------- | ------------------------ |
-| TinyLlama | 18-25% -> 50-60%           | 10-14% -> 20-30%         |
+| Model                 | Category (Before -> After) | Intent (Before -> After) |
+| --------------------- | -------------------------- | ------------------------ |
+| TinyLlama             | 22% -> 65%                 | 14% -> 30%               |
+| Llama 3.2 3B Instruct | 60% -> 70%                 | 46% -> 50%               |
 
 ## Conclusion
 
