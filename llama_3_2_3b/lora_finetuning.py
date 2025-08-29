@@ -31,7 +31,7 @@ def tokenize_function(example, tokenizer, max_length=512):
     return tokenized
 
 # Fine-tune for category classification
-def finetune_category_llama_3_2_3b(df_train, model, tokenizer, device):
+def finetune_category_llama_3_2_3b(df_train, model, tokenizer, device, lora_params: dict, training_params: dict):
     dataset = Dataset.from_pandas(df_train[["instruction", "category"]])
     dataset = dataset.map(lambda x: format_chat_category(x, tokenizer))
     dataset = dataset.map(lambda x: tokenize_function(x, tokenizer), batched=True)
@@ -40,8 +40,12 @@ def finetune_category_llama_3_2_3b(df_train, model, tokenizer, device):
     model = prepare_model_for_kbit_training(model)
     
     lora_config = LoraConfig(
-        r=8, lora_alpha=16, target_modules=["q_proj", "v_proj"],
-        lora_dropout=0.05, bias="none", task_type="CAUSAL_LM"
+        r=int(lora_params["r"]),
+        lora_alpha=int(lora_params["lora_alpha"]),
+        target_modules=["q_proj", "v_proj"],
+        lora_dropout=float(lora_params["lora_dropout"]),
+        bias="none", 
+        task_type="CAUSAL_LM"
     )
     
     model = get_peft_model(model, lora_config)
@@ -49,13 +53,13 @@ def finetune_category_llama_3_2_3b(df_train, model, tokenizer, device):
     
     training_args = TrainingArguments(
         output_dir="./tinyllama-lora-category-classifier",
-        per_device_train_batch_size=8,
-        gradient_accumulation_steps=2,
-        learning_rate=1e-4,
+        per_device_train_batch_size=int(training_params["batch_size"]),
+        gradient_accumulation_steps=int(training_params["gradient_accumulation_steps"]),
+        learning_rate=float(training_params["learning_rate"]),
         lr_scheduler_type="cosine",
-        warmup_ratio=0.03,
-        num_train_epochs=3,
-        logging_steps=100,
+        warmup_ratio=float(training_params["warmup_ratio"]),
+        num_train_epochs=int(training_params["train_epochs"]),
+        logging_steps=int(training_params["logging_steps"]),
         save_strategy="epoch",
         report_to="none",
         fp16=True,
@@ -73,7 +77,7 @@ def finetune_category_llama_3_2_3b(df_train, model, tokenizer, device):
     return model
 
 # Fine-tune for intent classification
-def finetune_intent_llama_3_2_3b(df_train, model, tokenizer, device, intents):
+def finetune_intent_llama_3_2_3b(df_train, model, tokenizer, device, intents, lora_params: dict, training_params: dict):
     dataset = Dataset.from_pandas(df_train[["instruction", "category", "intent"]])
     dataset = dataset.map(lambda x: format_chat_intent(x, tokenizer, intents))
     dataset = dataset.map(lambda x: tokenize_function(x, tokenizer), batched=True)
@@ -82,22 +86,26 @@ def finetune_intent_llama_3_2_3b(df_train, model, tokenizer, device, intents):
     model = prepare_model_for_kbit_training(model)
     
     lora_config = LoraConfig(
-        r=8, lora_alpha=16, target_modules=["q_proj", "v_proj"],
-        lora_dropout=0.05, bias="none", task_type="CAUSAL_LM"
+        r=int(lora_params["r"]),
+        lora_alpha=int(lora_params["lora_alpha"]),
+        target_modules=["q_proj", "v_proj"],
+        lora_dropout=float(lora_params["lora_dropout"]),
+        bias="none", 
+        task_type="CAUSAL_LM"
     )
     
     model = get_peft_model(model, lora_config)
     model.print_trainable_parameters()
     
     training_args = TrainingArguments(
-        output_dir="./tinyllama-lora-intent-classifier",
-        per_device_train_batch_size=8,
-        gradient_accumulation_steps=2,
-        learning_rate=1e-4,
+        output_dir="./tinyllama-lora-category-classifier",
+        per_device_train_batch_size=int(training_params["batch_size"]),
+        gradient_accumulation_steps=int(training_params["gradient_accumulation_steps"]),
+        learning_rate=float(training_params["learning_rate"]),
         lr_scheduler_type="cosine",
-        warmup_ratio=0.03,
-        num_train_epochs=3,
-        logging_steps=100,
+        warmup_ratio=float(training_params["warmup_ratio"]),
+        num_train_epochs=int(training_params["train_epochs"]),
+        logging_steps=int(training_params["logging_steps"]),
         save_strategy="epoch",
         report_to="none",
         fp16=True,

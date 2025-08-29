@@ -117,8 +117,10 @@ The table below compares the inference accuracy (zero-shot prompting) with accur
 
 | Model                 | Category (Before -> After) | Intent (Before -> After) |
 | --------------------- | -------------------------- | ------------------------ |
-| TinyLlama             | 22% -> 65%                 | 14% -> 30%               |
-| Llama 3.2 3B Instruct | 60% -> 70%                 | 46% -> 50%               |
+| TinyLlama             | 22% -> 55%                 | 14% -> 30%               |
+| Llama 3.2 3B Instruct | 54% -> 72%                 | 43% -> 60%               |
+| Mistral 7B v0.2       | Testing                    | Testing                  |
+| Gemma 7B IT           | Testing                    | Testing                  |
 
 ## Conclusion
 

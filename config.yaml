@@ -1,0 +1,24 @@
+# Hugging Face API key for accessing datasets or model hubs
+hf_key:
+
+# No of samples to apply. Use full dataset (27k rows) by setting to None
+dataset_size: 5000
+
+# Base model to be fine-tuned
+# Choose from: 'llama_3_2_3b', 'tinyllama', 'mistral_7b_v0_2', 'gemma_7b'
+model: llama_3_2_3b
+
+# LoRA (Low-Rank Adaptation) parameters for fine-tuning
+lora_parameters:
+  - r: 8                 # Rank of the LoRA matrices; controls adaptation capacity
+  - lora_alpha: 16       # Scaling factor for LoRA weights
+  - lora_dropout: 0.05   # Dropout probability applied to LoRA layers
+
+# Training parameters for the fine-tuning process
+training_parameters:
+  - batch_size: 4                        # Number of samples per batch
+  - gradient_accumulation_steps: 4       # Number of steps to accumulate gradients before updating weights
+  - learning_rate: 1e-4                  # Initial learning rate for the optimizer
+  - warmup_ratio: 0.03                    # Fraction of total steps used for learning rate warmup
+  - train_epochs: 3                       # Number of passes through the entire dataset
+  - logging_steps: 100                    # Frequency (in steps) to log training metrics
