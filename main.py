@@ -12,6 +12,12 @@ from tinyllama.lora_finetuning import finetune_category_tinyllama, finetune_inte
 from llama_3_2_3b.inference_prompting import general_inference_llama_3_2_3b
 from llama_3_2_3b.lora_finetuning import finetune_category_llama_3_2_3b, finetune_intent_llama_3_2_3b, evaluate_model_llama_3_2_3b
 
+# Mistral 7B v0.2 imports
+from mistral_7b_v0_2.inference_prompting import general_inference_mistral_7b_v0_2
+from mistral_7b_v0_2.lora_finetuning import finetune_category_mistral_7b_v0_2, finetune_intent_mistral_7b_v0_2, evaluate_model_mistral_7b_v0_2
+
+# Gemma 7B IT imports
+
 # Load configuration
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
@@ -73,7 +79,7 @@ def run_llama_3_2_3b():
     print(f"Accuracy without Fine-tuning [Llama 3.2 3B] on categories: {accuracy_category:.2f}%")
     print(f"Accuracy without Fine-tuning [Llama 3.2 3B] on intents: {accuracy_intent:.2f}%")
 
-    # Case 2: Performing fine-tuning with LoRA [Llama 3.2 3B]: {accuracy:.2f}%")
+    # Case 2: Performing fine-tuning with LoRA
     model_category_llama_3_2_3b = finetune_category_llama_3_2_3b(df_train, model_initial, tokenizer_initial, device, lora_params=lora_parameters, training_params=training_parameters)
     model_intent_llama_3_2_3b = finetune_intent_llama_3_2_3b(df_train, model_initial, tokenizer_initial, device, intents, lora_params=lora_parameters, training_params=training_parameters)
     accuracy_category, accuracy_intent, predictions_finetune = evaluate_model_llama_3_2_3b(df_test, model_category_llama_3_2_3b, model_intent_llama_3_2_3b, tokenizer_initial, device, categories, intents)
@@ -85,7 +91,23 @@ def run_mistral_7b_v0_2():
     """
     Model 3: Mistral 7B v0.2
     """
-    pass
+    model_id = "mistralai/Mistral-7B-Instruct-v0.2"
+    
+    # Load the initial model, tokenizer, and text generation pipeline
+    model_initial, tokenizer_initial, generator, device = model_loader(model_id)
+
+    # Case 1: Performing inference using general prompting (no fine-tuning)
+    accuracy_category, accuracy_intent, predictions_inference = general_inference_mistral_7b_v0_2(df_test, generator, categories, intents)
+
+    print(f"Accuracy without Fine-tuning [Mistral 7B v0.2] on categories: {accuracy_category:.2f}%")
+    print(f"Accuracy without Fine-tuning [Mistral 7B v0.2] on intents: {accuracy_intent:.2f}%")
+
+    # Case 2: Performing fine-tuning with LoRA
+    model_category_llama_3_2_3b = finetune_category_mistral_7b_v0_2(df_train, model_initial, tokenizer_initial, device, lora_params=lora_parameters, training_params=training_parameters)
+    model_intent_llama_3_2_3b = finetune_intent_mistral_7b_v0_2(df_train, model_initial, tokenizer_initial, device, intents, lora_params=lora_parameters, training_params=training_parameters)
+    accuracy_category, accuracy_intent, predictions_finetune = evaluate_model_mistral_7b_v0_2(df_test, model_category_llama_3_2_3b, model_intent_llama_3_2_3b, tokenizer_initial, device, categories, intents)
+    print(f"Accuracy with LoRa Fine-tuning [Mistral 7B v0.2] on categories: {accuracy_category:.2f}%")
+    print(f"Accuracy with LoRa Fine-tuning [Mistral 7B v0.2] on intents: {accuracy_intent:.2f}%")
 
 
 def run_gemma_7b():
