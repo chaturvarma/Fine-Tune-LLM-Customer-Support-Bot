@@ -17,6 +17,8 @@ from mistral_7b_v0_2.inference_prompting import general_inference_mistral_7b_v0_
 from mistral_7b_v0_2.lora_finetuning import finetune_category_mistral_7b_v0_2, finetune_intent_mistral_7b_v0_2, evaluate_model_mistral_7b_v0_2
 
 # Gemma 7B IT imports
+from gemma_7b.inference_prompting import general_inference_gemma_7b
+from gemma_7b.lora_finetuning import finetune_category_gemma_7b, finetune_intent_gemma_7b, evaluate_model_gemma_7b
 
 # Load configuration
 with open("config.yaml", "r") as f:
@@ -114,7 +116,23 @@ def run_gemma_7b():
     """
     Model 4: Gemma 7B IT
     """
-    pass
+    model_id = "google/gemma-7b-it"
+    
+    # Load the initial model, tokenizer, and text generation pipeline
+    model_initial, tokenizer_initial, generator, device = model_loader(model_id)
+
+    # Case 1: Performing inference using general prompting (no fine-tuning)
+    accuracy_category, accuracy_intent, predictions_inference = general_inference_gemma_7b(df_test, generator, categories, intents)
+
+    print(f"Accuracy without Fine-tuning [Gemma 7B] on categories: {accuracy_category:.2f}%")
+    print(f"Accuracy without Fine-tuning [Gemma 7B] on intents: {accuracy_intent:.2f}%")
+
+    # Case 2: Performing fine-tuning with LoRA
+    model_category_llama_3_2_3b = finetune_category_gemma_7b(df_train, model_initial, tokenizer_initial, device, lora_params=lora_parameters, training_params=training_parameters)
+    model_intent_llama_3_2_3b = finetune_intent_gemma_7b(df_train, model_initial, tokenizer_initial, device, intents, lora_params=lora_parameters, training_params=training_parameters)
+    accuracy_category, accuracy_intent, predictions_finetune = evaluate_model_gemma_7b(df_test, model_category_llama_3_2_3b, model_intent_llama_3_2_3b, tokenizer_initial, device, categories, intents)
+    print(f"Accuracy with LoRa Fine-tuning [Gemma 7B] on categories: {accuracy_category:.2f}%")
+    print(f"Accuracy with LoRa Fine-tuning [Gemma 7B] on intents: {accuracy_intent:.2f}%")
 
 
 # ==================================================
